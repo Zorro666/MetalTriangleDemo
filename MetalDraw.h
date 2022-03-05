@@ -10,13 +10,12 @@
 
 #include "metal/official/metal-cpp.h"
 
-struct MetalDraw
-{
+struct MetalDraw {
   void Loaded();
   void BuildDevice();
   void BuildVertexBuffers();
   void BuildPipeline();
-  
+
   void Draw(CA::MetalDrawable *pMetalDrawable);
   void CopyFrameBuffer(MTL::Texture *framebuffer);
 

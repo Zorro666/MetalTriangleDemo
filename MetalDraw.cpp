@@ -10,13 +10,11 @@
 
 #import <simd/simd.h>
 
-typedef struct Debug_UBO
-{
+typedef struct Debug_UBO {
   simd_float4 lightCol;
   simd_float4 darkCol;
   simd_float4 constants;
 } Debug_UBO;
-
 
 const char *defaultShaders = "\n\
 using namespace metal;\n\
@@ -108,46 +106,39 @@ fragment float4 fragment_main(constant Debug_UBO& debug_UBO [[buffer(0)]],\n\
 }\n\
 ";
 
-MetalDraw *CreateMetalDraw()
-{
-  return new MetalDraw;
-}
+MetalDraw *CreateMetalDraw() { return new MetalDraw; }
 
-void MetalDraw::Loaded()
-{
+void MetalDraw::Loaded() {
   BuildDevice();
   BuildVertexBuffers();
   BuildPipeline();
 }
 
-void MetalDraw::BuildDevice()
-{
+void MetalDraw::BuildDevice() {
   device = MTL::CreateSystemDefaultDevice();
-  printf("device name:'%s' registryID:%llu maxThreadsPerThreadgroup:%lu,%lu,%lu\n",
-        device->name()->cString(NS::UTF8StringEncoding),
-        device->registryID(),
-        device->maxThreadsPerThreadgroup().width,
-        device->maxThreadsPerThreadgroup().height,
-        device->maxThreadsPerThreadgroup().depth);
-  printf("device lowPower:%d headless:%d removable:%d hasUnifiedMemory:%d recommendedMaxWorkingSetSize:%llu\n",
-        device->lowPower(),
-        device->headless(),
-        device->removable(),
-        device->hasUnifiedMemory(),
-        device->recommendedMaxWorkingSetSize());
+  printf(
+      "device name:'%s' registryID:%llu maxThreadsPerThreadgroup:%lu,%lu,%lu\n",
+      device->name()->cString(NS::UTF8StringEncoding), device->registryID(),
+      device->maxThreadsPerThreadgroup().width,
+      device->maxThreadsPerThreadgroup().height,
+      device->maxThreadsPerThreadgroup().depth);
+  printf("device lowPower:%d headless:%d removable:%d hasUnifiedMemory:%d "
+         "recommendedMaxWorkingSetSize:%llu\n",
+         device->lowPower(), device->headless(), device->removable(),
+         device->hasUnifiedMemory(), device->recommendedMaxWorkingSetSize());
   printf("device location:%lu locationNumber:%lu maxTransferRate:%llu\n",
-        device->location(),
-        device->locationNumber(),
-        device->maxTransferRate());
-  printf("device depth24Stencil8PixelFormatSupported:%d readWriteTextureSupport:%lu argumentBuffersSupport:%lu areRasterOrderGroupsSupported:%d\n",
-        device->depth24Stencil8PixelFormatSupported(),
-        (unsigned long)device->readWriteTextureSupport(),
-        (unsigned long)device->argumentBuffersSupport(),
+         device->location(), device->locationNumber(),
+         device->maxTransferRate());
+  printf("device depth24Stencil8PixelFormatSupported:%d "
+         "readWriteTextureSupport:%lu argumentBuffersSupport:%lu "
+         "areRasterOrderGroupsSupported:%d\n",
+         device->depth24Stencil8PixelFormatSupported(),
+         (unsigned long)device->readWriteTextureSupport(),
+         (unsigned long)device->argumentBuffersSupport(),
          device->rasterOrderGroupsSupported());
 }
 
-void MetalDraw::BuildPipeline()
-{
+void MetalDraw::BuildPipeline() {
   NS::Error *error;
   NS::String *nsString = NS::String::alloc();
   NS::String *tempString = nullptr;
@@ -156,19 +147,17 @@ void MetalDraw::BuildPipeline()
   MTL::Library *library = device->newLibrary(tempString, NULL, &error);
   tempString->release();
   tempString = nullptr;
-  if (!library)
-  {
+  if (!library) {
     fprintf(stderr, "Error occurred when creating default library\n");
     exit(0);
   }
-  printf("Library.device %p name:'%s' registryID:%llu maxThreadsPerThreadgroup:%lu,%lu,%lu\n",
-        library->device(),
-        library->device()->name()->utf8String(),
-        library->device()->registryID(),
-        library->device()->maxThreadsPerThreadgroup().width,
-        library->device()->maxThreadsPerThreadgroup().height,
-        library->device()->maxThreadsPerThreadgroup().depth);
-
+  printf("Library.device %p name:'%s' registryID:%llu "
+         "maxThreadsPerThreadgroup:%lu,%lu,%lu\n",
+         library->device(), library->device()->name()->utf8String(),
+         library->device()->registryID(),
+         library->device()->maxThreadsPerThreadgroup().width,
+         library->device()->maxThreadsPerThreadgroup().height,
+         library->device()->maxThreadsPerThreadgroup().depth);
 
   tempString = nsString->init("vertex_main", NS::UTF8StringEncoding);
   MTL::Function *vertexFunc = library->newFunction(tempString);
@@ -184,17 +173,19 @@ void MetalDraw::BuildPipeline()
   pipelineDescriptor = pipelineDescriptor->alloc();
   pipelineDescriptor->init();
 
-  MTL::RenderPipelineColorAttachmentDescriptorArray *colorAttachments = pipelineDescriptor->colorAttachments();
-  MTL::RenderPipelineColorAttachmentDescriptor *colorAttachment0 = colorAttachments->object(0);
+  MTL::RenderPipelineColorAttachmentDescriptorArray *colorAttachments =
+      pipelineDescriptor->colorAttachments();
+  MTL::RenderPipelineColorAttachmentDescriptor *colorAttachment0 =
+      colorAttachments->object(0);
   colorAttachment0->setPixelFormat(MTL::PixelFormat::PixelFormatBGRA8Unorm);
   colorAttachments->setObject(colorAttachment0, 0);
   pipelineDescriptor->setVertexFunction(vertexFunc);
   pipelineDescriptor->setFragmentFunction(fragmentFunc);
 
   pipeline = device->newRenderPipelineState(pipelineDescriptor, &error);
-  if (!pipeline)
-  {
-    fprintf(stderr, "Error occurred when creating render pipeline state: %s\n", error->description()->utf8String());
+  if (!pipeline) {
+    fprintf(stderr, "Error occurred when creating render pipeline state: %s\n",
+            error->description()->utf8String());
     exit(0);
   }
 
@@ -202,9 +193,9 @@ void MetalDraw::BuildPipeline()
   MTL::Library *debugLibrary = device->newLibrary(tempString, NULL, &error);
   tempString->release();
   tempString = nullptr;
-  if (!debugLibrary)
-  {
-    fprintf(stderr, "Error occurred when creating debug library : %s\n", error->description()->utf8String());
+  if (!debugLibrary) {
+    fprintf(stderr, "Error occurred when creating debug library : %s\n",
+            error->description()->utf8String());
     exit(0);
   }
 
@@ -212,8 +203,7 @@ void MetalDraw::BuildPipeline()
   MTL::Function *debugVertexFunc = debugLibrary->newFunction(tempString);
   tempString->release();
   tempString = nullptr;
-  if (!debugVertexFunc)
-  {
+  if (!debugVertexFunc) {
     fprintf(stderr, "Error finding shader function 'vertex_main'\n");
     exit(0);
   }
@@ -222,8 +212,7 @@ void MetalDraw::BuildPipeline()
   MTL::Function *blitVertexFunc = debugLibrary->newFunction(tempString);
   tempString->release();
   tempString = nullptr;
-  if (!blitVertexFunc)
-  {
+  if (!blitVertexFunc) {
     fprintf(stderr, "Error finding shader function 'blit_vertex'\n");
     exit(0);
   }
@@ -231,8 +220,7 @@ void MetalDraw::BuildPipeline()
   tempString = nsString->init("fragment_main", NS::UTF8StringEncoding);
   MTL::Function *debugFragmentFunc = debugLibrary->newFunction(tempString);
   tempString->release();
-  if (!debugFragmentFunc)
-  {
+  if (!debugFragmentFunc) {
     fprintf(stderr, "Error finding shader function 'fragment_main'\n");
     exit(0);
   }
@@ -249,15 +237,18 @@ void MetalDraw::BuildPipeline()
   debugPipelineDescriptor->setAlphaToOneEnabled(true);
 
   MTL::TextureDescriptor *textureDescriptor = nullptr;
-  textureDescriptor = textureDescriptor->texture2DDescriptor(MTL::PixelFormat::PixelFormatBGRA8Unorm, 1024, 1024, false);
-  textureDescriptor->setUsage(MTL::TextureUsageRenderTarget | MTL::TextureUsageShaderRead);
+  textureDescriptor = textureDescriptor->texture2DDescriptor(
+      MTL::PixelFormat::PixelFormatBGRA8Unorm, 1024, 1024, false);
+  textureDescriptor->setUsage(MTL::TextureUsageRenderTarget |
+                              MTL::TextureUsageShaderRead);
   textureDescriptor->setUsage(MTL::TextureUsageUnknown);
   fb1 = device->newTexture(textureDescriptor);
 
-  debugPipeline = device->newRenderPipelineState(debugPipelineDescriptor, &error);
-  if (!debugPipeline)
-  {
-    fprintf(stderr, "Error creating debugPipeline %s\n", error->description()->utf8String());
+  debugPipeline =
+      device->newRenderPipelineState(debugPipelineDescriptor, &error);
+  if (!debugPipeline) {
+    fprintf(stderr, "Error creating debugPipeline %s\n",
+            error->description()->utf8String());
     exit(0);
   }
 
@@ -280,40 +271,39 @@ void MetalDraw::BuildPipeline()
   nsString->release();
 }
 
-void MetalDraw::BuildVertexBuffers()
-{
-  static const float positions[] =
-  {
-    0.0,  0.5, 0, 1,
-    -0.5, -0.5, 0, 1,
-    0.5, -0.5, 0, 1,
+void MetalDraw::BuildVertexBuffers() {
+  static const float positions[] = {
+      0.0, 0.5, 0, 1, -0.5, -0.5, 0, 1, 0.5, -0.5, 0, 1,
   };
 
-  static const float colors[] =
-  {
-    1.0f, 0.0f, 0.0f, 1.0f,
-    0.0f, 1.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f, 1.0f,
+  static const float colors[] = {
+      1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
   };
 
-  positionBuffer = device->newBuffer(positions, sizeof(positions), MTL::ResourceOptionCPUCacheModeDefault);
-  colorBuffer = device->newBuffer(colors, sizeof(colors), MTL::ResourceOptionCPUCacheModeDefault);
-  debugUBOBuffer = device->newBuffer(sizeof(Debug_UBO), MTL::ResourceStorageModeShared);
+  positionBuffer = device->newBuffer(positions, sizeof(positions),
+                                     MTL::ResourceOptionCPUCacheModeDefault);
+  colorBuffer = device->newBuffer(colors, sizeof(colors),
+                                  MTL::ResourceOptionCPUCacheModeDefault);
+  debugUBOBuffer =
+      device->newBuffer(sizeof(Debug_UBO), MTL::ResourceStorageModeShared);
 }
 
-void MetalDraw::Draw(CA::MetalDrawable *pMetalDrawable)
-{
+void MetalDraw::Draw(CA::MetalDrawable *pMetalDrawable) {
   MTL::Texture *framebufferTexture = pMetalDrawable->texture();
-  MTL::RenderPassDescriptor *renderPass1 = MTL::RenderPassDescriptor::renderPassDescriptor();
-  MTL::RenderPassColorAttachmentDescriptorArray *colorAttachments1 = renderPass1->colorAttachments();
+  MTL::RenderPassDescriptor *renderPass1 =
+      MTL::RenderPassDescriptor::renderPassDescriptor();
+  MTL::RenderPassColorAttachmentDescriptorArray *colorAttachments1 =
+      renderPass1->colorAttachments();
   colorAttachments1->object(0)->setTexture(fb1);
-  colorAttachments1->object(0)->setClearColor(MTL::ClearColor(1.0, 1.0, 1.0, 1.0));
+  colorAttachments1->object(0)->setClearColor(
+      MTL::ClearColor(1.0, 1.0, 1.0, 1.0));
   colorAttachments1->object(0)->setStoreAction(MTL::StoreActionStore);
   colorAttachments1->object(0)->setLoadAction(MTL::LoadActionClear);
 
   MTL::CommandBuffer *commandBuffer1 = commandQueue->commandBuffer();
 
-  MTL::RenderCommandEncoder *commandEncoder1 = commandBuffer1->renderCommandEncoder(renderPass1);
+  MTL::RenderCommandEncoder *commandEncoder1 =
+      commandBuffer1->renderCommandEncoder(renderPass1);
   commandEncoder1->setRenderPipelineState(pipeline);
   commandEncoder1->setVertexBuffer(positionBuffer, 0, 0);
   commandEncoder1->setVertexBuffer(colorBuffer, 0, 1);
@@ -322,20 +312,26 @@ void MetalDraw::Draw(CA::MetalDrawable *pMetalDrawable)
 
   commandBuffer1->commit();
   MTL::CommandBuffer *commandBuffer2 = commandQueue->commandBuffer();
-  Debug_UBO *debug_UBO = (Debug_UBO*)debugUBOBuffer->contents();
+  Debug_UBO *debug_UBO = (Debug_UBO *)debugUBOBuffer->contents();
   debug_UBO->constants.x = framebufferTexture->width();
   debug_UBO->constants.y = framebufferTexture->height();
   debug_UBO->constants.z = 128.0f;
-  debug_UBO->lightCol = simd_make_float4(2 * 0.117647059f, 2 * 0.215671018f, 2 * 0.235294119f, 1.0f);
-  debug_UBO->darkCol = simd_make_float4(2 * 0.176470593f, 2 * 0.14378576f, 2 * 0.156862751f, 1.0f);
+  debug_UBO->lightCol = simd_make_float4(2 * 0.117647059f, 2 * 0.215671018f,
+                                         2 * 0.235294119f, 1.0f);
+  debug_UBO->darkCol = simd_make_float4(2 * 0.176470593f, 2 * 0.14378576f,
+                                        2 * 0.156862751f, 1.0f);
 
-  MTL::RenderPassDescriptor *renderPass2 = MTL::RenderPassDescriptor::renderPassDescriptor();
-  MTL::RenderPassColorAttachmentDescriptorArray *colorAttachments2 = renderPass2->colorAttachments();
+  MTL::RenderPassDescriptor *renderPass2 =
+      MTL::RenderPassDescriptor::renderPassDescriptor();
+  MTL::RenderPassColorAttachmentDescriptorArray *colorAttachments2 =
+      renderPass2->colorAttachments();
   colorAttachments2->object(0)->setTexture(framebufferTexture);
-  colorAttachments2->object(0)->setClearColor(MTL::ClearColor(1.0, 1.0, 1.0, 1.0));
+  colorAttachments2->object(0)->setClearColor(
+      MTL::ClearColor(1.0, 1.0, 1.0, 1.0));
   colorAttachments2->object(0)->setStoreAction(MTL::StoreActionStore);
   colorAttachments2->object(0)->setLoadAction(MTL::LoadActionLoad);
-  MTL::RenderCommandEncoder *commandEncoder2 = commandBuffer2->renderCommandEncoder(renderPass2);
+  MTL::RenderCommandEncoder *commandEncoder2 =
+      commandBuffer2->renderCommandEncoder(renderPass2);
 
   MTL::Viewport viewport;
   viewport.originX = 0.0f;
@@ -360,35 +356,36 @@ void MetalDraw::Draw(CA::MetalDrawable *pMetalDrawable)
   commandBuffer2->commit();
 }
 
-void MetalDraw::CopyFrameBuffer(MTL::Texture *framebuffer)
-{
+void MetalDraw::CopyFrameBuffer(MTL::Texture *framebuffer) {
   MTL::CommandBuffer *commandBuffer = commandQueue->commandBuffer();
   MTL::BlitCommandEncoder *blitEncoder = commandBuffer->blitCommandEncoder();
 
   NS::UInteger sourceWidth = framebuffer->width();
   NS::UInteger sourceHeight = framebuffer->height();
-  MTL::Origin sourceOrigin(0,0,0);
+  MTL::Origin sourceOrigin(0, 0, 0);
   MTL::Size sourceSize(sourceWidth, sourceHeight, 1);
 
   NS::UInteger bytesPerPixel = 4;
-  NS::UInteger bytesPerRow   = sourceWidth * bytesPerPixel;
+  NS::UInteger bytesPerRow = sourceWidth * bytesPerPixel;
   NS::UInteger bytesPerImage = sourceHeight * bytesPerRow;
 
-  MTL::Buffer *cpuPixelBuffer = device->newBuffer(bytesPerImage, MTL::ResourceStorageModeShared);
+  MTL::Buffer *cpuPixelBuffer =
+      device->newBuffer(bytesPerImage, MTL::ResourceStorageModeShared);
 
-  blitEncoder->copyFromTexture(framebuffer, 0, 0, sourceOrigin, sourceSize, cpuPixelBuffer, 0, bytesPerRow, bytesPerImage);
+  blitEncoder->copyFromTexture(framebuffer, 0, 0, sourceOrigin, sourceSize,
+                               cpuPixelBuffer, 0, bytesPerRow, bytesPerImage);
   blitEncoder->endEncoding();
 
   commandBuffer->commit();
   commandBuffer->waitUntilCompleted();
   static int jake = 0;
-  if (jake % 1000 == 0)
-  {
+  if (jake % 1000 == 0) {
     uint32_t *pixels = (uint32_t *)cpuPixelBuffer->contents();
-    printf("0x%X 0x%X 0x%X 0x%X\n", pixels[sourceWidth/2 + sourceHeight/2 * sourceWidth],
-          pixels[sourceWidth/2 + sourceHeight*2/3 * sourceWidth],
-          pixels[sourceWidth*3/5 + sourceHeight/2 * sourceWidth],
-          pixels[sourceWidth/2 + sourceHeight/3 * sourceWidth]);
+    printf("0x%X 0x%X 0x%X 0x%X\n",
+           pixels[sourceWidth / 2 + sourceHeight / 2 * sourceWidth],
+           pixels[sourceWidth / 2 + sourceHeight * 2 / 3 * sourceWidth],
+           pixels[sourceWidth * 3 / 5 + sourceHeight / 2 * sourceWidth],
+           pixels[sourceWidth / 2 + sourceHeight / 3 * sourceWidth]);
     cpuPixelBuffer->release();
   }
   ++jake;

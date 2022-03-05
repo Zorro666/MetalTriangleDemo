@@ -4,8 +4,7 @@
 #import "MetalDraw.h"
 #import <QuartzCore/CAMetalLayer.h>
 
-@implementation MetalCPPView
-{
+@implementation MetalCPPView {
   CVDisplayLinkRef displayLink;
   CAMetalLayer *metalLayer;
   MetalDraw *metalDraw;
@@ -19,7 +18,7 @@
   return [CAMetalLayer class];
 }
 
-- (CALayer*)makeBackingLayer {
+- (CALayer *)makeBackingLayer {
 
   CALayer *layer = [self.class.layerClass layer];
   CGSize viewScale = [self convertSizeToBacking:CGSizeMake(1.0, 1.0)];
@@ -32,10 +31,8 @@
   self.layer.contentsScale = MIN(viewScale.width, viewScale.height);
 }
 
-- (void)loaded
-{
-  @autoreleasepool
-  {
+- (void)loaded {
+  @autoreleasepool {
     NSLog(@"view loaded");
     metalDraw = CreateMetalDraw();
 
@@ -48,12 +45,11 @@
   }
 }
 
-- (void)draw
-{
-  @autoreleasepool
-  {
+- (void)draw {
+  @autoreleasepool {
     id<CAMetalDrawable> drawable = [metalLayer nextDrawable];
-    CA::MetalDrawable *pMetalCppDrawable  = (__bridge CA::MetalDrawable*)drawable;
+    CA::MetalDrawable *pMetalCppDrawable =
+        (__bridge CA::MetalDrawable *)drawable;
     metalDraw->Draw(pMetalCppDrawable);
   }
 }
