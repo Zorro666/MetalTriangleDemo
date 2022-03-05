@@ -10,6 +10,43 @@
 #include "MetalCPPViewController.h"
 #import <Cocoa/Cocoa.h>
 
+void Poll() {
+  @autoreleasepool
+  {
+    for(;;)
+    {
+      NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny
+                                          untilDate:[NSDate distantPast]
+                                             inMode:NSDefaultRunLoopMode
+                                            dequeue:YES];
+      if(event == nil)
+        break;
+
+      [NSApp sendEvent:event];
+    }
+  }
+
+}
+
+void DeleteWindow(NSWindow *window) {
+  if(window == nil)
+    return;
+
+  @autoreleasepool
+  {
+    [window orderOut:nil];
+    [window setDelegate:nil];
+
+    NSView *view = window.contentView;
+    [view release];
+    window.contentView = nil;
+
+    [window close];
+
+    Poll();
+  }
+}
+
 int main(int argc, const char *argv[]) {
   @autoreleasepool {
     // Setup code that might create autoreleased objects goes here.
@@ -48,6 +85,11 @@ int main(int argc, const char *argv[]) {
     [nsWindow orderFront:nil];
     [NSApp activateIgnoringOtherApps:YES];
     [nsWindow makeKeyAndOrderFront:nil];
+
+    while (1) {
+      Poll();
+    }
+    DeleteWindow(nsWindow);
   }
-  return NSApplicationMain(argc, argv);
+  exit(EXIT_SUCCESS);
 }

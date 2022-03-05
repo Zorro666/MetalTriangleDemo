@@ -3,8 +3,6 @@ TARGETS := MetalTriangleCPP
 # Flags
 CFLAGS += -std=c++17
 
-ARCH := arm64
-
 SRCS_CPP := MetalDraw.cpp
 SRCS_OBJC := MetalCPPView.mm MetalCPPViewController.mm main.mm
 HEADERS := MetalCPPView.h MetalCPPViewController.h MetalDraw.h
