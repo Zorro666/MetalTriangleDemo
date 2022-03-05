@@ -1,4 +1,4 @@
 # Specify filepatterns you want git to ignore.
-MetalTriangleCPP.app/
 .DS_Store
+MetalTriangleCPP
 
