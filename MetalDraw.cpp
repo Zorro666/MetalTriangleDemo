@@ -17,6 +17,32 @@ typedef struct Debug_UBO
   simd_float4 constants;
 } Debug_UBO;
 
+
+const char *defaultShaders = "\n\
+using namespace metal;\n\
+\n\
+struct ColoredVertex\n\
+{\n\
+    float4 position [[position]];\n\
+    float4 color;\n\
+};\n\
+\n\
+vertex ColoredVertex vertex_main(constant float4 *position [[buffer(0)]],\n\
+                                 constant float4 *color [[buffer(1)]],\n\
+                                 uint vid [[vertex_id]])\n\
+{\n\
+    ColoredVertex vert;\n\
+    vert.position = position[vid];\n\
+    vert.color = color[vid];\n\
+    return vert;\n\
+}\n\
+\n\
+fragment float4 fragment_main(ColoredVertex vert [[stage_in]])\n\
+{\n\
+    return vert.color;\n\
+}\n\
+";
+
 const char *debugShaders = "\n\
 using namespace metal;\n\
 \n\
@@ -87,11 +113,11 @@ MetalDraw *CreateMetalDraw()
   return new MetalDraw;
 }
 
-void MetalDraw::Loaded(NS::String *defaultLibraryPath, NS::Data *defaultLibraryData)
+void MetalDraw::Loaded()
 {
   BuildDevice();
   BuildVertexBuffers();
-  BuildPipeline(defaultLibraryPath, defaultLibraryData);
+  BuildPipeline();
 }
 
 void MetalDraw::BuildDevice()
@@ -120,31 +146,16 @@ void MetalDraw::BuildDevice()
          device->rasterOrderGroupsSupported());
 }
 
-void MetalDraw::BuildPipeline(NS::String *defaultLibraryPath, NS::Data *defaultLibraryData)
+void MetalDraw::BuildPipeline()
 {
   NS::Error *error;
   NS::String *nsString = NS::String::alloc();
   NS::String *tempString = nullptr;
 
-  /*
-  dispatch_data_t data = dispatch_data_create(defaultLibraryData->mutableBytes(), defaultLibraryData->length(), dispatch_get_main_queue(), DISPATCH_DATA_DESTRUCTOR_DEFAULT);
-  MTL::Library *dataLibrary = device->newLibrary(data, &error);
-  printf("\nPtr:%p count %lu\n", defaultLibraryData->mutableBytes(), defaultLibraryData->length());
-  defaultLibraryPath->release();
-  if (!dataLibrary) {
-    fprintf(stderr, "Failed to load library error %s\n", error->description()->utf8String());
-    exit(0);
-  }
-  */
-  /*
-  MTL::Library *fileLibrary = device->newLibrary(defaultLibraryPath, &error);
-  if (!fileLibrary)
-  {
-    fprintf(stderr, "Failed to load library '%s' error %s\n", defaultLibraryPath->utf8String(), error->description()->utf8String());
-    exit(0);
-  }
-  */
-  MTL::Library *library = device->newDefaultLibrary();
+  tempString = nsString->init(defaultShaders, NS::UTF8StringEncoding);
+  MTL::Library *library = device->newLibrary(tempString, NULL, &error);
+  tempString->release();
+  tempString = nullptr;
   if (!library)
   {
     fprintf(stderr, "Error occurred when creating default library\n");
@@ -157,6 +168,7 @@ void MetalDraw::BuildPipeline(NS::String *defaultLibraryPath, NS::Data *defaultL
         library->device()->maxThreadsPerThreadgroup().width,
         library->device()->maxThreadsPerThreadgroup().height,
         library->device()->maxThreadsPerThreadgroup().depth);
+
 
   tempString = nsString->init("vertex_main", NS::UTF8StringEncoding);
   MTL::Function *vertexFunc = library->newFunction(tempString);

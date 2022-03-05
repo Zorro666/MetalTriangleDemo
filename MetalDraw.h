@@ -12,10 +12,10 @@
 
 struct MetalDraw
 {
-  void Loaded(NS::String *defaultLibraryPath, NS::Data *defaultLibraryData);
+  void Loaded();
   void BuildDevice();
   void BuildVertexBuffers();
-  void BuildPipeline(NS::String *defaultLibraryPath, NS::Data *defaultLibraryData);
+  void BuildPipeline();
   
   void Draw(CA::MetalDrawable *pMetalDrawable);
   void CopyFrameBuffer(MTL::Texture *framebuffer);

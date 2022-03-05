@@ -1,4 +1,4 @@
-TARGETS := MetalTriangleCPP.app
+TARGETS := MetalTriangleCPP
 
 # Flags
 CFLAGS += -std=c++17
@@ -20,19 +20,6 @@ all: $(TARGETS)
 
 clean:
 	@rm -rvf $(TARGETS)
-	@rm -rvf $(TEMP_OUTPUT)
 
-$(TEMP_OUTPUT)/MetalTriangleCPP: $(SRCS) $(HEADERS) Makefile
-	mkdir -p $(TEMP_OUTPUT)
-	mkdir -p MetalTriangleCPP.app/Contents/MacOS
-	mkdir -p MetalTriangleCPP.app/Contents/Resources
+MetalTriangleCPP: $(SRCS) $(HEADERS) Makefile
 	$(CC) -arch $(ARCH) $(CFLAGS) $(SRCS) -o $@ $(LIBS)
-#	ibtool --errors --warnings --notices --output-format human-readable-text --compile MetalTriangleCPP.app/Contents/Resources/en.lproj/MainMenu.nib en.lproj/MainMenu.xib
-
-
-MetalTriangleCPP.app: $(TEMP_OUTPUT)/MetalTriangleCPP Makefile
-	cp $(TEMP_OUTPUT)/MetalTriangleCPP $@/Contents/MacOS/MetalTriangleCPP
-	cp ./Info.plist $@/Contents
-	cp -r ./Resources $@/Contents
-	rm -f $(TEMP_OUTPUT)/MetalTriangleCPP
-	touch $@

@@ -36,12 +36,10 @@
 {
   @autoreleasepool
   {
+    NSLog(@"view loaded");
     metalDraw = CreateMetalDraw();
-    NSBundle *appBundle = [NSBundle mainBundle];
-    NSString *defaultLibaryPath = [appBundle pathForResource:@"default" ofType:@"metallib"];
-    NSData *myData = [NSData dataWithContentsOfFile:defaultLibaryPath];
 
-    metalDraw->Loaded((__bridge NS::String*)defaultLibaryPath, (__bridge NS::Data*)myData);
+    metalDraw->Loaded();
     metalLayer = (CAMetalLayer *)[self layer];
     assert(metalLayer);
     metalLayer.device = (__bridge id<MTLDevice>)metalDraw->device;
