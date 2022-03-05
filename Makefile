@@ -21,5 +21,11 @@ all: $(TARGETS)
 clean:
 	@rm -rvf $(TARGETS)
 
-MetalTriangleCPP: $(SRCS) $(HEADERS) Makefile
-	$(CC) -arch $(ARCH) $(CFLAGS) $(SRCS) -o $@ $(LIBS)
+x86_64_app: $(SRCS) $(HEADERS) Makefile
+	$(CC) $(CFLAGS) $(SRCS) -o $@ $(LIBS) -target x86_64-apple-macos10.12
+
+arm64_app: $(SRCS) $(HEADERS) Makefile
+	$(CC) $(CFLAGS) $(SRCS) -o $@ $(LIBS) -target arm64-apple-macos11
+
+MetalTriangleCPP: x86_64_app arm64_app
+	lipo -create -output MetalTriangleCPP x86_64_app arm64_app

@@ -1,4 +1,6 @@
 # Specify filepatterns you want git to ignore.
 .DS_Store
 MetalTriangleCPP
+arm64_app
+x86_64_app
 
