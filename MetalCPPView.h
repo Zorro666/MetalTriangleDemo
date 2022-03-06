@@ -1,6 +1,6 @@
 #import <Cocoa/Cocoa.h>
 
-@interface MetalCPPView : NSView
+@interface MetalCPPView : NSView <NSTextInputClient>
 
 - (void)loaded;
 - (void)draw;
