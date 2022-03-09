@@ -138,6 +138,7 @@ int main(int argc, const char *argv[]) {
     [nsWindow makeFirstResponder:view];
     [nsWindow setTitle:@"MetalTriangleDemo"];
     [nsWindow setDelegate:windowDelegate];
+    [nsWindow setAcceptsMouseMovedEvents:YES];
     [nsWindow setRestorable:NO];
 
     [nsWindow orderFront:nil];
