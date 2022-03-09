@@ -12,10 +12,6 @@
 
 struct MetalDraw {
   void Loaded();
-  void BuildDevice();
-  void BuildVertexBuffers();
-  void BuildPipeline();
-
   void Draw(CA::MetalDrawable *pMetalDrawable);
   void CopyFrameBuffer(MTL::Texture *framebuffer);
 
@@ -29,6 +25,11 @@ struct MetalDraw {
   MTL::Buffer *debugUBOBuffer;
 
   MTL::Texture *fb1;
+private:
+  void BuildDevice();
+  void BuildVertexBuffers();
+  void BuildPipeline();
+
 };
 
 MetalDraw *CreateMetalDraw();
